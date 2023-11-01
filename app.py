@@ -18,10 +18,12 @@ import boto3, botocore
 import os
 import matplotlib.image as mpimg
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
+app.static_folder = 'static'
+
 
 # Load the model
-model = tf.keras.models.load_model('calendario/content/calendario-model')
+#model = tf.keras.models.load_model('calendario/content/calendario-model')
 
 # Setup IBM cloud object storage
 # COS_ENDPOINT = "cos://us-south/danielcustommodel-donotdelete-pr-wkzwnxz3qrox3j/"
@@ -67,8 +69,8 @@ def crear_secuencias(data, len_secuencia):
 
     return secuencias, etiquetas
     
-@app.route('/recordatorioAutomatico', methods=['POST'])
-def predict():
+# @app.route('/recordatorioAutomatico', methods=['POST'])
+# def predict():
     # Preparar datos para la prediccion de un modelo
     # --------------------------------------
     data = {
@@ -286,7 +288,17 @@ def check_card():
         if vencimiento_date <= siguiente_mes:
             message = "Hola " + user["Alias"] + ", tu tarjeta " + tarjeta["nombre"] + " ****" + str(tarjeta["numero"][-4:] + " se vence en un mes. ¿Quieres solicitar una nueva?")
 
-    return {"message": message}
+    # Return the message
+
+    card_number = "****" + str(user["Tarjetas"][0]["numero"][-4:])
+    card_name = user["Tarjetas"][0]["nombre"]
+    card_balance_integers = int(user["Tarjetas"][0]["saldo"])
+    card_balance_separated_by_commas = "{:,}".format(card_balance_integers)
+    card_balance_decimals = int((user["Tarjetas"][0]["saldo"] - card_balance_integers) * 100)
+    decimals_formated_at_two_digits = str(card_balance_decimals).zfill(2)
+    
+
+    return render_template('card/card.html', card_number=card_number, card_name=card_name, card_balance_integers=card_balance_separated_by_commas, card_balance_decimals=decimals_formated_at_two_digits, message=message)
 
 @app.route('/get_random_user', methods=['POST'])
 def get_random_user():

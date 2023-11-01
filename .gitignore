@@ -1,0 +1,8 @@
+# Flask App specific ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment folder (venv)
+myenv/
